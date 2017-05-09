@@ -1,0 +1,34 @@
+---
+- name: Check if CodeDeploy is installed
+  stat:
+    path: /opt/codedeploy-agent/.version
+  register: codedeploy_stat
+  ignore_errors: true
+- name: Install CodeDeploy dependencies
+  apt:
+    state: latest
+    name: "{{ item }}"
+  become: true
+  with_items:
+    - ruby
+    - git
+  when: codedeploy_stat.stat.exists == false
+- name: Download CodeDeploy-Agent
+  get_url:
+    url: https://aws-codedeploy-us-east-2.s3.amazonaws.com/latest/install
+    dest: /tmp/codedeploy-install
+  when: codedeploy_stat.stat.exists == false
+- name: Set permissions for CodeDeploy-Agent
+  file:
+    state: file
+    path: /tmp/codedeploy-install
+    group: ubuntu
+    owner: ubuntu
+    mode: 0755
+  when: codedeploy_stat.stat.exists == false
+- name: Install CodeDeploy-Agent
+  become: true
+  command: /tmp/codedeploy-install auto
+  notify:
+  - start codedeploy-agent
+  when: codedeploy_stat.stat.exists == false

@@ -1,0 +1,13 @@
+[production]
+52.14.50.55
+
+[production:vars]
+ansible_user=ubuntu
+
+[development]
+13.58.47.33
+13.58.51.130
+
+[development:vars]
+ansible_user=ubuntu
+
