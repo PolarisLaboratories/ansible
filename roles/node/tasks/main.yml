@@ -1,9 +1,31 @@
 ---
-- name: Install nginx
-  apt:
-    name: nginx
-    state: latest
-    update_cache: yes
+- name: Check if NodeJS is installed
+  command: dpkg-query -l nodejs
+  register: deb_check
+  ignore_errors: true
+- name: Download Node script
+  get_url:
+    url: https://deb.nodesource.com/setup_7.x
+    dest: /tmp/node_setup
+  when: deb_check.stderr.find('no packages found') != -1
+- name: Set permissions for Node script
+  file:
+    state: file
+    path: /tmp/node_setup
+    group: ubuntu
+    owner: ubuntu
+    mode: 0755
+  when: deb_check.stderr.find('no packages found') != -1
+- name: Install Node script
+  command: /tmp/node_setup
   become: true
-  notify:
-  - start nginx
+  when: deb_check.stderr.find('no packages found') != -1
+- name: Install Node
+  apt:
+    name: nodejs
+    state: latest
+  become: true
+  when: deb_check.stderr.find('no packages found') != -1
+- name: Install pm2
+  command: npm install -g pm2
+  become: true
