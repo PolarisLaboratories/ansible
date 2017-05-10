@@ -1,0 +1,24 @@
+---
+- name: start mongodb
+  service:
+    name: mongodb
+    state: started
+  become: true
+
+- name: restart mongodb
+  service:
+    name: mongodb
+    state: restarted
+  become: true
+
+- name: reload mongodb
+  service:
+    name: mongodb
+    state: reloaded
+  become: true
+
+- name: stop mongodb
+  service:
+    name: mongodb
+    state: stopped
+  become: true

@@ -3,5 +3,6 @@
   roles:
   - codedeploy
   - common
+  - mongodb
   - nginx
   - node

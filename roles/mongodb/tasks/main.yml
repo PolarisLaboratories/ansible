@@ -1,0 +1,41 @@
+---
+- name: Detect whether MongoDB is installed
+  command: dpkg-query -W -f='${Status}\n' mongodb-org | head -n1 | awk '{print $3;}' | grep -q '^installed$'
+  register: deb_check
+  failed_when: deb_check.rc > 1
+  changed_when: deb_check.rc == 1
+- name: Add Mongo APT key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 0C49F3730359A14518585931BC711F9BA15703C6
+  become: true
+  when: deb_check.rc == 1
+- name: Create MongoDB list file
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse
+    state: present
+  become: true
+  when: deb_check.rc == 1
+- name: Refresh APT database
+  apt:
+    update_cache: yes
+  become: true
+  when: deb_check.rc == 1
+- name: Install MongoDB
+  apt:
+    name: mongodb-org
+    state: latest
+  become: true
+  when: deb_check.rc == 1
+- name: Install MongoDB service
+  copy:
+    src: "{{ role_path }}/files/mongodb.service"
+    dest: /etc/systemd/system/mongodb.service
+  become: true
+  when: deb_check.rc == 1
+- name: Ensure MongoDB service is running
+  systemd:
+    name: mongodb
+    state: started
+    enabled: yes
+  become: true
