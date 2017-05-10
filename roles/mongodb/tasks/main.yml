@@ -1,9 +1,9 @@
 ---
 - name: Detect whether MongoDB is installed
-  command: dpkg-query -W -f='${Status}\n' mongodb-org | head -n1 | awk '{print $3;}' | grep -q '^installed$'
+  raw: dpkg-query -W -f='${Status}\n' mongodb-org | head -n1 | awk '{print $3;}' | grep -q '^installed$'
   register: deb_check
   failed_when: deb_check.rc > 1
-  changed_when: deb_check.rc == 1
+  changed_when: False
 - name: Add Mongo APT key
   apt_key:
     keyserver: keyserver.ubuntu.com
